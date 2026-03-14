@@ -4,8 +4,11 @@ RUN apt-get update && apt-get install -y \
     php \
     php-fpm \
     php-mysql \
+    php-xml \
+    php-mbstring \
     curl \
-    mariadb-client
+    mariadb-client \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /run/php
 
