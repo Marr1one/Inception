@@ -1,6 +1,6 @@
 all:
-	@mkdir -p /home/marwan/data/mariadb
-	@mkdir -p /home/marwan/data/wordpress
+	@mkdir -p /home/maissat/data/mariadb
+	@mkdir -p /home/maissat/data/wordpress
 	docker compose -f srcs/docker-compose.yml up --build
 down:
 	docker compose -f srcs/docker-compose.yml down
@@ -9,8 +9,8 @@ clean:
 fclean:
 	docker compose -f srcs/docker-compose.yml down -v
 	docker system prune -af
-	sudo rm -rf /home/marwan/data/mariadb/*
-	sudo rm -rf /home/marwan/data/wordpress/*
+	sudo rm -rf /home/maissat/data/mariadb/*
+	sudo rm -rf /home/maissat/data/wordpress/*
 re: fclean all
 
 .PHONY: all down clean fclean re
