@@ -24,7 +24,8 @@ if [ ! -f wp-config.php ]; then
         --dbuser=$MYSQL_USER \
         --dbpass=$MYSQL_PASSWORD \
         --dbhost=mariadb \
-        --allow-root
+        --allow-root \
+		--url="http://$DOMAIN_NAME"
 
     # 4. Attente de la base de données (Crucial pour éviter les crashs au démarrage)
     echo "Vérification de la connexion à MariaDB..."
