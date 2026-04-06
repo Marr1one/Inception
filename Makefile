@@ -7,6 +7,7 @@ clean:
 fclean:
 	docker compose -f srcs/docker-compose.yml down -v
 	docker system prune -af
+
 re: fclean all
 
 .PHONY: all down clean fclean re

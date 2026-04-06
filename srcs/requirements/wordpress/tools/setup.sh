@@ -34,7 +34,6 @@ if [ ! -f wp-config.php ]; then
     done
 
     # 5. Installation du site et création de l'ADMINISTRATEUR
-    # Note : WP_ADMIN ne doit pas être "admin" ou ton login perso
     wp core install \
         --url="https://$DOMAIN_NAME" \
         --title="$WP_TITLE" \
