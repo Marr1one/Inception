@@ -18,13 +18,14 @@ The project aims to deepen understanding of containerization, system administrat
 
 ### Overview of Services
 
-The infrastructure includes the following services, each in its own container:
+The infrastructure is composed of three main services, each running in its own container:
 
-| Service | Description |
-|---	  |             |
-| **NGINX** | Reverse proxy and TLS termination (TLSv1.2/1.3 only) — the sole entry point |
-| **WordPress** | PHP-FPM-based CMS(Content Management System) connected to MariaDB |
-| **MariaDB** | Relational database storing WordPress data |
+| Service       | Description                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| **NGINX**     | Handles incoming requests, manages HTTPS (TLS), and acts as the entry point to the website |
+| **WordPress** | The website application, running with PHP-FPM and connected to the database                |
+| **MariaDB**   | Stores all the website data, such as users, posts, and settings                            |
+
 
 All services communicate through a custom Docker network and persist data via Docker volumes.
 
@@ -32,7 +33,7 @@ All services communicate through a custom Docker network and persist data via Do
 
 The project uses **Docker** and **Docker Compose** to define, build, and run the infrastructure. All images are built from custom `Dockerfile`s — no pre-built images from Docker Hub (except base OS image `debian`).
 
-Sensitive data (database passwords, WordPress admin credentials) are managed through **Docker Secrets**, not plain environment variables. Configuration files and initialization scripts are included in the `srcs/` directory alongside the `docker-compose.yml`. // AAAAAAAAAAAAAAAAAAAAAAAAAAA FAUT QUE JE REVIENNE LA DESSUS AAAAAAAAAA UN .ENV SUFFIT IMO QQQQQQQQQQAAAAAAa
+Sensitive data (such as database passwords and WordPress admin credentials) are managed using a `.env` file, which i prefer for his simplicity. Configuration files and initialization scripts are stored in the `srcs/` directory alongside the `docker-compose.yml`.
 
 **Main design choices:**
 
@@ -45,54 +46,29 @@ Sensitive data (database passwords, WordPress admin credentials) are managed thr
 
 ### Virtual Machines vs Docker
 
-| | Virtual Machines | Docker |
-|---|---|---|
-| **Isolation** | Full OS-level isolation via hypervisor | Process-level isolation via Linux namespaces & cgroups | A REFAIRE EN UNE OU DEUX PHRASE PLUS SIMPLES 
-| **Weight** | Heavy: each VM includes a full OS kernel | Lightweight: containers share the host kernel |
-| **Startup time** | Minutes | Seconds |
-| **Portability** | Limited — tied to hypervisor compatibility | Highly portable — runs anywhere Docker is installed |
-| **Use case** | Full system emulation, strong security boundaries | Microservices, CI/CD, reproducible dev environments |
-
-Docker is preferred here because we want lightweight, reproducible, and quickly deployable services without the overhead of full virtual machines.
+* **Virtual Machines** run a full operating system with their own kernel, making them heavier but strongly isolated.
+* **Docker** runs applications in lightweight containers that share the host kernel, making them faster and more efficient.
 
 ---
 
 ### Secrets vs Environment Variables
 
-| | Secrets | Environment Variables | A REFAIRE EN UNE OU DEUX PHRASE PLUS SIMPLES 
-|---|---|---|
-| **Security** | Stored as files in `/run/secrets/`, not exposed in `docker inspect` or process lists | Visible in `docker inspect`, logs, and child processes |
-| **Persistence** | Managed by Docker, never written to the image layer | Can accidentally leak into image layers via `ENV` instructions |
-| **Use case** | Passwords, API keys, certificates | Non-sensitive config (ports, hostnames, feature flags) |
-
-In this project, credentials (DB password, WordPress admin password, etc.) are handled as **Docker Secrets** to avoid exposing sensitive data in environment variables or image metadata.
+* **Secrets** securely store sensitive data like passwords or API keys without exposing them.
+* **Environment variables** are used for general configuration and may be visible.
 
 ---
 
 ### Docker Network vs Host Network
 
-| | Docker Network (bridge) | Host Network | A REFAIRE EN UNE OU DEUX PHRASE PLUS SIMPLES 
-|---|---|---|
-| **Isolation** | Containers have their own virtual network, isolated from the host | Containers share the host's network stack directly |
-| **Security** | Better isolation — containers only communicate through defined rules | No network isolation — full access to host interfaces |
-| **Port management** | Explicit port mapping required (`-p 443:443`) | No port mapping needed, but risk of conflicts |
-| **Use case** | Multi-service apps where services communicate internally | Performance-critical apps needing raw network speed |
-
-This project uses a **custom bridge network** so that services (NGINX, WordPress, MariaDB) can communicate by container name (DNS resolution) while remaining isolated from the host and each other unless explicitly configured.
+* A **Docker bridge network** isolates containers and allows controlled communication between them.
+* The **host network** gives containers direct access to the host’s network, but without isolation.
 
 ---
 
 ### Docker Volumes vs Bind Mounts
 
-| | Docker Volumes | Bind Mounts | A REFAIRE EN UNE OU DEUX PHRASE PLUS SIMPLES 
-|---|---|---|
-| **Management** | Fully managed by Docker | Directly mapped to a host path |
-| **Portability** | Portable — not tied to a specific host path | Tied to the host filesystem structure |
-| **Performance** | Optimized for Docker I/O | Depends on host OS and filesystem |
-| **Visibility** | Stored in Docker's internal directory | Directly visible and editable from the host |
-| **Use case** | Persistent data in production | Development — live editing, config injection |
-
-This project uses **named volumes** mapped to specific host paths (`/home/<login>/data/`) as required by the subject, combining the benefits of visibility (for evaluation) with Docker-managed lifecycle.
+* **Docker volumes** are managed by Docker and provide portable and persistent data storage.
+* **Bind mounts** directly map a host directory into a container, which is useful for development but less portable.
 
 ---
 
@@ -108,28 +84,24 @@ This project uses **named volumes** mapped to specific host paths (`/home/<login
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/<login>/inception.git //mettre le lien 42 
+   git clone https://github.com//inception.git //mettre le lien 42 
    cd inception
    ```
 
-2. Add the domain to your `/etc/hosts`:
+2. Add the domain to your `/etc/hosts` if he is not in it:
    ```bash
    echo "127.0.0.1  <login>.42.fr" | sudo tee -a /etc/hosts
    ```
 
-3. Create the required data directories:
-   ```bash
-   mkdir -p ~/data/wordpress ~/data/mariadb
-   ```
-
-4. Fill in your secrets in `srcs/secrets/` (see `srcs/secrets/README` for required files). // moi je met dans .env
+3. Remember to implement your own .env file in the `srcs/` folder with your passwords and usernames (dont forget the domain name) . // moi je met dans .env
 
 ### Build & Run
 
 ```bash
 make        # Build and start all containers
 make down   # Stop and remove containers
-make clean  # Stop containers and remove volumes
+make clean # Stop and clean more than make down
+make fclean  # Stop containers and remove volumes
 make re     # Full rebuild
 ```
 
@@ -138,7 +110,13 @@ make re     # Full rebuild
 Once running, open your browser and navigate to:
 
 ```
-https://maissat.42.fr
+https://<your-login42>>.fr
+```
+
+You can also write articles with this link and in possession of your admin password and username:
+
+```
+https://<your-login42>>.fr/wp-admin
 ```
 
 > ⚠️ The certificate is self-signed — you will need to accept the browser warning.
@@ -151,28 +129,12 @@ https://maissat.42.fr
 
 - [Docker official documentation](https://docs.docker.com/)
 - [Docker Compose reference](https://docs.docker.com/compose/compose-file/)
-- [Docker Secrets](https://docs.docker.com/engine/swarm/secrets/)
-- [NGINX documentation](https://nginx.org/en/docs/)
-- [WordPress CLI](https://wp-cli.org/)
 - [MariaDB documentation](https://mariadb.com/kb/en/)
-- [PHP-FPM configuration](https://www.php.net/manual/en/install.fpm.configuration.php)
-- [TLS/SSL with NGINX](https://nginx.org/en/docs/http/ngx_http_ssl_module.html)
-
-### Articles & Tutorials
-
-- [Best practices for writing Dockerfiles](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
-- [Understanding Docker networking](https://docs.docker.com/network/)
-- [Difference between COPY and ADD in Dockerfiles](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#add-or-copy)
-- [Managing sensitive data with Docker Secrets](https://docs.docker.com/engine/swarm/secrets/)
-- [Linux namespaces and cgroups — the foundation of containers](https://www.redhat.com/en/topics/containers/whats-a-linux-container)
 
 ### AI Usage
 
-AI (Claude, Anthropic) was used during this project for the following tasks:
+AI (Chatgpt and Google Gemini) was used during this project for the following tasks:
 
 - **Debugging**: Help diagnosing issues with entrypoint scripts, service startup ordering, and volume permission errors.
-- **Documentation**: Generating and structuring this README, particularly the comparison tables.
-- **Configuration review**: Reviewing NGINX TLS configuration and PHP-FPM pool settings for correctness.
+- **Documentation**: Generating and structuring this README, particularly the comparison tables and for the facilitation of documentation.
 - **Understanding concepts**: Clarifying the differences between Docker networking modes, secrets vs environment variables, and volume types.
-
-AI was **not** used to write the core Dockerfiles, `docker-compose.yml`, or service configuration files — those were written and tested manually to ensure full understanding of each component.
