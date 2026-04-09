@@ -7,6 +7,8 @@ down:
 clean:
 	docker system prune -af
 fclean:
+	rm -rf /home/maissat/data/mariadb
+	rm -rf /home/maissat/data/wordpress
 	docker compose -f srcs/docker-compose.yml down -v
 	docker system prune -af
 
