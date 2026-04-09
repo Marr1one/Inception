@@ -1,4 +1,6 @@
 all:
+	mkdir -p /home/maissat/data/mariadb
+	mkdir -p /home/maissat/data/wordpress
 	docker compose -f srcs/docker-compose.yml up --build
 down:
 	docker compose -f srcs/docker-compose.yml down
