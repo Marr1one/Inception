@@ -105,4 +105,4 @@ All data is stored using Docker volumes:
 * Database: `/var/lib/mysql`
 * Website files: `/var/www`
 
-These ensure that data is not lost when containers are stopped or removed.
+Data will only be lost if the volumes themselves are explicitly deleted.

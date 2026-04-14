@@ -82,17 +82,18 @@ docker volume inspect <volume_name>
 
 ## 🔹 Data Storage and Persistence
 
-The project uses two main volumes:
+The project uses two main Docker volumes:
 
-* **MariaDB volume** (`/var/lib/mysql`):
+* **MariaDB volume** (`/var/lib/mysql`):  
   Stores all database data (tables, users, content).
 
-* **WordPress volume** (`/var/www`):
+* **WordPress volume** (`/var/www`):  
   Stores website files (WordPress core, themes, plugins).
 
-These volumes ensure data persistence independently from containers.
+These volumes are managed by Docker.  
 
----
+However, data will be permanently deleted only if both the Docker volumes and the host data directory are removed (e.g., using `
+docker-compose down -v` and manual deletion of `/home/login/data`).
 
 ## 🔹 Architecture Overview
 

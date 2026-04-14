@@ -90,7 +90,8 @@ Sensitive data (such as database passwords and WordPress admin credentials) are 
 
 2. Add the domain to your `/etc/hosts` if he is not in it:
    ```bash
-   echo "127.0.0.1  <login>.42.fr" | sudo tee -a /etc/hosts
+    "127.0.0.1  <login>.42.fr" //add this in /etc/hosts
+    nano /etc/hosts
    ```
 
 3. Remember to implement your own .env file in the `srcs/` folder with your passwords and usernames (dont forget the domain name) . // moi je met dans .env
